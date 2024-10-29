@@ -1,10 +1,14 @@
-import { useState } from "react";
-import axios from "axios"
+import { useContext, useState } from "react";
+import axios from "axios";
+import { UserContext } from "../../context/UserContext";
+
 const AuthenticateUser = () => {
   const [authState, setAuthState] = useState({
     username: "",
     password: ""
   });
+
+  const {setUsername,setId} = useContext(UserContext)
   const [error, setError] = useState(null);
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +17,7 @@ const AuthenticateUser = () => {
     password: ""
   });
 
-  axios.defaults.baseURL = "http://localhost:3333/api/v1" ;
+  axios.defaults.baseURL = "http://localhost:3333/api/v1";
   axios.defaults.withCredentials = true;
 
   const validateInputs = () => {
@@ -31,7 +35,7 @@ const AuthenticateUser = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -41,12 +45,19 @@ const AuthenticateUser = () => {
       return;
     }
 
-    const {data} = await axios.post("/register",authState)
-    console.log(data,"data")
+    try {
+      console.log(authState,"state")
+      const { data } = await axios.post(isLogin ? "/login" : "/register", authState);
+      setUsername(data.username)
+      setId(data.id)
+      console.log(data, "data");
 
-
-
-    console.log(authState,"state")
+    } catch (error) {
+      console.log(error)
+      setError(error.response?.data?.error || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleToggleChange = () => {
@@ -102,6 +113,10 @@ const AuthenticateUser = () => {
         <button type="submit" className="bg-blue-500 text-white block w-full rounded-sm p-2">
           {isLoading ? "Processing..." : isLogin ? "LOGIN" : "SIGN UP"}
         </button>
+
+        {error && (
+          <p className="text-red-500 text-xs text-center mt-2 font-semibold">{error}</p>
+        )}
 
         <section className="text-center mt-4">
           {isLogin ? "Don't have an account?" : "Already have an account?"}

@@ -5,6 +5,14 @@ const userCltr = require('./app/controllers/userCltr')
 const db = require('./db/dbConfig')
 
 const app = express()
+const cors = require("cors")
+
+app.use(express.json())
+
+app.use(cors({
+    credentials:true,
+    origin:process.env.CLIENT_URL
+}))
 
 mongoose.connect(process.env.MONGO_URL)
 
