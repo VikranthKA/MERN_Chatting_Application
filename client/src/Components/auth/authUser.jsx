@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import axios from "axios"
 const AuthenticateUser = () => {
   const [authState, setAuthState] = useState({
     username: "",
@@ -12,6 +12,9 @@ const AuthenticateUser = () => {
     username: "",
     password: ""
   });
+
+  axios.defaults.baseURL = "http://localhost:3333/api/v1" ;
+  axios.defaults.withCredentials = true;
 
   const validateInputs = () => {
     const errors = {};
@@ -28,7 +31,7 @@ const AuthenticateUser = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -38,10 +41,12 @@ const AuthenticateUser = () => {
       return;
     }
 
-    setTimeout(() => {
-      setIsLoading(false);
-      // Handle successful login/signup here
-    }, 3000);
+    const {data} = await axios.post("/register",authState)
+    console.log(data,"data")
+
+
+
+    console.log(authState,"state")
   };
 
   const handleToggleChange = () => {
@@ -67,7 +72,7 @@ const AuthenticateUser = () => {
 
   return (
     <div className="bg-blue-50 h-screen flex items-center">
-      <form onSubmit={handleSubmit} className="mx-auto w-11/12 md:w-1/2 lg:w-1/3">
+      <form onSubmit={handleSubmit} className="mx-auto w-11/12 sm:w-8/12 md:w-1/2 lg:w-1/3">
         <input
           type="text"
           name="username"
