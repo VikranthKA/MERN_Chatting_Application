@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
-import axios from "axios";
 import { UserContext } from "../../context/UserContext";
+import axios from "../api_resources/axios";
 
 const AuthenticateUser = () => {
   const [authState, setAuthState] = useState({
@@ -17,8 +17,7 @@ const AuthenticateUser = () => {
     password: ""
   });
 
-  axios.defaults.baseURL = "http://localhost:3333/api/v1";
-  axios.defaults.withCredentials = true;
+
 
   const validateInputs = () => {
     const errors = {};

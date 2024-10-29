@@ -11,13 +11,13 @@ try {
 
         const createdUser = await User.create({username,password:hashedPassword})
 
-        jwt.sign({userId:createdUser._id},process.env.JWT_SECRET_KEY,(err,token)=>{
+        jwt.sign({userId:createdUser._id,username:createdUser.username},process.env.JWT_SECRET_KEY,(err,token)=>{
             if(err){
                 console.log(err)
                 return res.status(500).json({error:err, message: "Internal server error" });
 
             }
-            return res.cookie('token',token,{httpOnly:true,secure:process.env.NODE_ENV==='production'})
+            return res.cookie('token',token,{httpOnly:true,secure:process.env.NODE_ENV==='production',samSite:'strict'})
             .status(201)
             .json({
                 message:"User created successfully",
@@ -39,6 +39,29 @@ try {
     }
 }
 
+userCltr.profile = async (req, res) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({
+            error: "Token not provided",
+            message: "You must be logged in to access this resource"
+        });
+    }
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET_KEY, {}, (err, userData) => {
+            if (err) throw err;
+            res.json(userData);
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: error,
+            message: "Error while fetching profile"
+        });
+    }
+};
 
 
 module.exports = userCltr

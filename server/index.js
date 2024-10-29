@@ -3,8 +3,12 @@ const express = require("express")
 const { default: mongoose } = require('mongoose')
 const userCltr = require('./app/controllers/userCltr')
 const db = require('./db/dbConfig')
+const cookieParser = require('cookie-parser');
+
+
 
 const app = express()
+app.use(cookieParser());
 const cors = require("cors")
 
 app.use(express.json())
@@ -29,8 +33,7 @@ app.get("/test",(req,res)=>{
 const apiPrefixV1 = "/api/v1"
 
 app.post(`${apiPrefixV1}/register`,userCltr.register)
-
-
+app.get(`${apiPrefixV1}/profile`,userCltr.profile)
  
 app.listen(PORT,()=>{
     console.log("Server On!")
