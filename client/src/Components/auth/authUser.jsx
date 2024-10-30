@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import axios from "../api_resources/axios";
+import { useNavigate } from "react-router-dom";
 
 const AuthenticateUser = () => {
   const [authState, setAuthState] = useState({
@@ -17,7 +18,7 @@ const AuthenticateUser = () => {
     password: ""
   });
 
-
+  const navigate = useNavigate()
 
   const validateInputs = () => {
     const errors = {};
@@ -46,10 +47,12 @@ const AuthenticateUser = () => {
 
     try {
       console.log(authState,"state")
-      const { data } = await axios.post(isLogin ? "/login" : "/register", authState);
+      const { data } = await axios.post(isLogin ? "/login" : "/register", authState,{ withCredentials: true });
+      console.log(data,"data")
       setUsername(data.username)
       setId(data.id)
       console.log(data, "data");
+      navigate("/")
 
     } catch (error) {
       console.log(error)

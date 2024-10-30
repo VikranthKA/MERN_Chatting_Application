@@ -3,6 +3,53 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const userCltr = {}
 
+
+
+userCltr.login = async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const foundUser = await User.findOne({ username });
+        if (!foundUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isVerifiedUser = bcrypt.compareSync(password, foundUser.password);
+        if (isVerifiedUser) {
+            jwt.sign(
+                { userId: foundUser._id, username: foundUser.username },
+                process.env.JWT_SECRET_KEY,
+                (err, token) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).json({ error: err, message: "Internal server error" });
+                    }
+                    return res
+                        .cookie('token', token, {
+                            httpOnly: true,
+                            secure: process.env.NODE_ENV === 'production',
+                            sameSite: 'strict'
+                        })
+                        .status(200)
+                        .json({
+                            message: "User logged in successfully",
+                            username: foundUser.username,
+                            id: foundUser._id
+                        });
+                }
+            );
+        } else {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: error,
+            message: "Error while processing login"
+        });
+    }
+};
+
+
 userCltr.register = async(req,res)=>{
     const {username,password} = req.body
 
