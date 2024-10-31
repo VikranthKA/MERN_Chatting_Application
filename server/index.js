@@ -5,9 +5,7 @@ const userCltr = require('./app/controllers/userCltr')
 const db = require('./db/dbConfig')
 const cookieParser = require('cookie-parser');
 const ws = require('ws')
-const jwt= require('jsonwebtoken')
-
-
+const jwt = require('jsonwebtoken')
 
 const app = express()
 app.use(cookieParser());
@@ -16,8 +14,8 @@ const cors = require("cors")
 app.use(express.json())
 
 app.use(cors({
-    credentials:true,
-    origin:process.env.CLIENT_URL
+    credentials: true,
+    origin: process.env.CLIENT_URL
 }))
 
 mongoose.connect(process.env.MONGO_URL)
@@ -28,63 +26,64 @@ const PORT = process.env.PORT || 3333
 db()
 
 
-app.get("/test",(req,res)=>{
+app.get("/test", (req, res) => {
     res.send('test ok')
 })
 
 const apiPrefixV1 = "/api/v1"
 
-app.post(`${apiPrefixV1}/register`,userCltr.register)
-app.get(`${apiPrefixV1}/profile`,userCltr.profile)
-app.post(`${apiPrefixV1}/login`,userCltr.login)
+app.post(`${apiPrefixV1}/register`, userCltr.register)
+app.get(`${apiPrefixV1}/profile`, userCltr.profile)
+app.post(`${apiPrefixV1}/login`, userCltr.login)
 
- 
-const server = app.listen(PORT,()=>{
-    console.log("Server On!")
-})
 
-const wss = new ws.WebSocketServer({server})
+const server = app.listen(PORT, () => {
+    console.log("Server On!");
+});
 
-wss.on('connection',(connection,req)=>{
-    // console.log('connected')
-    // connection.send('hello')
-    // console.log(req.headers,"h")
+const wss = new ws.WebSocketServer({ server })
 
-    const cookies = req.headers.cookie
-    if(!cookies){
-        return res.status(401).json({
-            error: "cookies not provided",
-            message: "You must be logged in to access this resource"
-        });
-    }
-    const tokenCookieString = cookies.split(';').find(str=>str.startsWith('token='))
-    if(!tokenCookieString){
-        return res.status(401).json({
-            error: "cookies not found",
-            message: "not found"
-        });
+wss.on('connection', (connection, req) => {
+    const cookies = req.headers.cookie;
+    if (!cookies) {
+        connection.close(1008, "Cookies not provided. Login required.");
+        return;
     }
 
-    const token = tokenCookieString.split('=')[1]
-    if(!token){
-        return res.status(401).json({
-            error: "token not provided",
-            message: "You must be logged in to access this resource"
-        });
+    const tokenCookieString = cookies.split(';').find(str => str.trim().startsWith('token='));
+    if (!tokenCookieString) {
+        connection.close(1008, "Token not found in cookies. Login required.");
+        return;
     }
+
+    const token = tokenCookieString.split('=')[1];
+    if (!token) {
+        connection.close(1008, "Token not provided. Login required.");
+        return;
+    }
+
     jwt.verify(token, process.env.JWT_SECRET_KEY, {}, (err, userData) => {
-        if (err) throw err;
-        const {userId,username} = userData;
+        if (err) {
+            connection.close(1008, "Token verification failed.");
+            return;
+        }
+
+        const { userId, username } = userData;
         connection.userId = userId;
-        connection.username = username
-        connection.username = username
+        connection.username = username;
+
+        console.log("Connected clients:", [...wss.clients].map(c => c.username));
+
+        [...wss.clients].forEach(client => {
+            client.send(JSON.stringify({
+                online: [...wss.clients].map(c => ({ userId: c.userId, username: c.username }))
+            }
+            ))
+        })
     });
 
-    console.log([...wss.clients].map(c=>c.username))
-})
 
-
-
-
-
-
+    connection.on('message', (message) => {
+        console.log(`Message from ${connection.username}:`, message.toString());
+    });
+});
