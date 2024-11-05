@@ -1,27 +1,23 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import AuthenticateUser from "./Components/auth/authUser"
-import { UserContextProvider } from "./context/UserContext"
 import axios from "axios";
-import Chat from "./Components/Chat/chat";
+import { Button } from "./components/ui/button";
 
 const App = () => {
   axios.defaults.withCredentials = true;
   return (
     <>
       <BrowserRouter>
-        <UserContextProvider>
           <main>
-            <Routes>
+            <Button>Click me</Button>
+            {/* <Routes>
 
-              {/* yet to add the protected and privated route */}
 
-              <Route path="/" element={<Chat />} />
+              <Route path="/" element={<>hi</>} />
 
-              <Route path="/verifyUser" element={<AuthenticateUser />} />
+              <Route path="/verifyUser" element={<>hi</>} />
 
-            </Routes>
+            </Routes> */}
           </main>
-        </UserContextProvider>
       </BrowserRouter>
     </>
   )
