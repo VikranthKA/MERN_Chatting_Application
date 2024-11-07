@@ -1,43 +1,30 @@
 require('dotenv').config()
 const express = require("express")
 const { default: mongoose } = require('mongoose')
-const userCltr = require('./app/controllers/userCltr')
-const db = require('./db/dbConfig')
 const cookieParser = require('cookie-parser');
 const ws = require('ws')
 const jwt = require('jsonwebtoken')
-
-const app = express()
-app.use(cookieParser());
 const cors = require("cors")
 
-app.use(express.json())
+const app = express()
+const PORT = process.env.PORT || 3333
 
+const db = require('./db/dbConfig')
+const authRoute = require('./app/routes/auth.routes')
+
+app.use(cookieParser());
+app.use(express.json())
 app.use(cors({
     credentials: true,
     origin: process.env.CLIENT_URL
 }))
 
-mongoose.connect(process.env.MONGO_URL)
-
-const PORT = process.env.PORT || 3333
 
 
-db()
-
-
-app.get("/test", (req, res) => {
-    res.send('test ok')
-})
-
-const apiPrefixV1 = "/api/v1"
-
-app.post(`${apiPrefixV1}/register`, userCltr.register)
-app.get(`${apiPrefixV1}/profile`, userCltr.profile)
-app.post(`${apiPrefixV1}/login`, userCltr.login)
-
+app.use("/api/auth",authRoute)
 
 const server = app.listen(PORT, () => {
+    db()
     console.log("Server On!");
 });
 
