@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3333
 
 const db = require('./db/dbConfig')
 const authRoute = require('./app/routes/auth.routes')
+const messageRoute = require('./app/routes/message.routes')
 
 app.use(cookieParser());
 app.use(express.json())
@@ -22,6 +23,7 @@ app.use(cors({
 
 
 app.use("/api/auth",authRoute)
+app.use("/api/messages",messageRoute)
 
 const server = app.listen(PORT, () => {
     db()
