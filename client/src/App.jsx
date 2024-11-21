@@ -2,21 +2,26 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import axios from "axios";
 
 import { Suspense } from "react";
+import Login from "./pages/login";
+import Home from "./pages/home";
 
 const App = () => {
   axios.defaults.withCredentials = true;
   return (
-    <BrowserRouter>
+    <div className="p-4 h-screen flex items-center justify-center">
+    <BrowserRouter> 
 
       <Routes>
 
-        {/* <Route path="/auth" element={<Auth/>} />
-        <Route path="/profile" element={<Profile/>} />
-        <Route path="/chat" element={<Chat/>} />
-        <Route path="*" element={<Auth/>} /> */}
+        <Route path="/login" element={<Login/>} />
+        <Route path="/" element={<Home/>} />
+
+       
+        <Route path="*" element={<h1>Not found</h1>} />
 
       </Routes>
     </BrowserRouter>
+    </div>
   )
 }
 

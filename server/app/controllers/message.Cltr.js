@@ -11,7 +11,7 @@ messagesCltr.sendMessage = async(req,res)=>{
         const senderId = req.user._id
         if (!message || !receiverId) {
             return res.status(400).json({ error: "Message and receiver ID are required." });
-          }
+        }
 
         let conversation =  await Conversation.findOne({
             participants:{$all:[senderId,receiverId]}
@@ -36,7 +36,7 @@ messagesCltr.sendMessage = async(req,res)=>{
         }
 
         await conversation.save()
-        a
+        
 
         return res.status(201).json(newMessage)
         
@@ -46,4 +46,23 @@ messagesCltr.sendMessage = async(req,res)=>{
     }
 }
 
+
+messagesCltr.getMessages = async(req,res)=>{
+    try {
+        const {id:userToChatId} = req.params
+        const sendId  = req.user._id
+        const conversation = await Conversation.findOne({
+            participants:{$all:[sendId,userToChatId]}
+        }).populate('message')
+
+        if(!conversation) return res.status(200).json({error:"Start a conversation"})
+
+        return res.status(200).json({
+            data:conversation
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({error:"Internal server error"})
+    }
+}
 module.exports = messagesCltr
