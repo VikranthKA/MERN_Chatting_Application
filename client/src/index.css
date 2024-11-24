@@ -9,11 +9,12 @@
   box-sizing: border-box;
 }
 
-body{
-  background: linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2),url("./assets/bg_Img.avif"));
+.image {
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("./assets/bg_Img.avif");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  height: 100vh; /* Ensure the div takes full viewport height */
 }
 
